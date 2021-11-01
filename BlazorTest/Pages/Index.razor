@@ -1,0 +1,20 @@
+﻿@inject BlazorTest.Data.Repository.IRepository repository;
+
+@page "/"
+
+
+
+<h1>это body</h1>
+<button class="button" @onclick ="GetList">
+    Get 
+</button>
+@code {
+
+    private IEnumerable<Advertisement> advertisements = new List<Advertisement>();
+
+    private void GetList()
+    {
+        advertisements = repository.GetAdvertisements();
+    }
+}
+        

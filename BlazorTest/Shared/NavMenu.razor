@@ -1,0 +1,45 @@
+﻿
+<nav class="navbar navbar-icon-top navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Авторынок</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="@NavMenuCssClass">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">                   
+                    Главная
+                </a>
+            </li>
+            <li class="nav-item active ">
+                <a class="nav-link" href="#">
+                    Объявления
+                    <span class="badge badge-info">5</span>
+                </a>
+            </li>
+            
+        </ul>
+        <ul class="navbar-nav mr-sm-2">
+            <li class="nav-item">
+                <button type="submit" class="btn btn-primary">Подать объявление</button>
+            </li>            
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="text" placeholder="Поиск по объявлениям" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
+        </form>
+    </div>
+</nav>
+
+@code {
+        
+        private bool collapseNavMenu = true;
+
+        private string NavMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : null;
+
+        private void ToggleNavMenu()
+        {
+            collapseNavMenu = !collapseNavMenu;
+        }
+    }
