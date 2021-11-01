@@ -1,5 +1,8 @@
-﻿namespace BlazorTest.Models.Enums
+﻿using System;
+
+namespace BlazorTest.Models.Enums
 {
+
     public enum CarCaseModels
     {
         Sedan,

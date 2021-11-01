@@ -6,7 +6,7 @@ namespace BlazorTest.Data.Repository
     public interface IRepository
     {
         IEnumerable<Advertisement> GetAdvertisements();
-        void AddAdvertisment(string modelName, string pathToImage, string info);
+        void AddAdvertisment(Car carstring,Advertiser advertiser, string pathToImage);
         void DelAdvertisment(string VinCode);
     }
 }

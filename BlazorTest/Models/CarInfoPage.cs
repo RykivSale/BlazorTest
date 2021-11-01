@@ -7,6 +7,7 @@ namespace BlazorTest.Models
 {
     public class CarInfoPage : Advertisement
     {
+        public List<byte[]> Images;
         public string Color { get; set; }
         public string YearOfConstruction { get; set; }
         public string CarCase { get; set; }
