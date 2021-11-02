@@ -17,7 +17,7 @@ namespace BlazorTest.Data.Repository
         List<Car> cars = new List<Car>();
         List<Advertiser> advertisers = new List<Advertiser>();
         List<KeyValuePair<int, string>> linking_information = new List<KeyValuePair<int, string>>();
-        List<CarInfoPage> advertisements = new List<CarInfoPage>();
+        public List<CarInfoPage> advertisements = new List<CarInfoPage>();
         
 
         public SQLRepository(DB context)
@@ -88,48 +88,56 @@ namespace BlazorTest.Data.Repository
         }
         public void AddAdvertisment(Car car,Advertiser advertiser, string pathToImage)    
         {
+
             advertisers.Add(advertiser);
             cars.Add(car);
             linking_information.Add(new KeyValuePair<int, string>(advertiser.Id, car.VinCode));
 
             advertisements.Add(new CarInfoPage(car, advertiser));
             advertisements[advertisements.Count - 1].Image = File.ReadAllBytes(pathToImage);
-            advertisements[advertisements.Count - 1].Images.Add(File.ReadAllBytes(pathToImage));
-
+            /*advertisements[advertisements.Count - 1].Images.Add(File.ReadAllBytes(pathToImage))*/;
+            var conn = new SqlConnection(_context.Database.GetConnectionString());
+            conn.Open();
             SqlCommand sqlCommand = new SqlCommand(
                 $"INSERT INTO [CarStat] (VinCode, Model, Color, Mileage, CarCase, Engine, Equipment,Tax, Gearbox, MoreInfo," +
                 $"Cost, YearOfConstruction) " +
                 $"VALUES (@VinCode, @Model, @Color, @Mileage, @CarCase, @Engine, @Equipment, @Tax, @Gearbox, @MoreInfo," +
-                $"@Cost, @YearOfConstruction)", new SqlConnection(_context.Database.GetConnectionString()));
+                $"@Cost, @YearOfConstruction)", conn);
             sqlCommand.Parameters.AddWithValue("VinCode", car.VinCode);
             sqlCommand.Parameters.AddWithValue("Model", car.ModelName);
             sqlCommand.Parameters.AddWithValue("Color", car.Color);
-            sqlCommand.Parameters.AddWithValue("Mileage", car.GetMileage());
-            sqlCommand.Parameters.AddWithValue("CarCase", car.GetCarCase());
-            sqlCommand.Parameters.AddWithValue("Engine", car.GetEngine());
-            sqlCommand.Parameters.AddWithValue("Equipment", car.GetEquipment());
-            sqlCommand.Parameters.AddWithValue("Tax", car.GetTax());
-            sqlCommand.Parameters.AddWithValue("Gearbox", car.GetGearbox());
+            sqlCommand.Parameters.AddWithValue("Mileage", car.Mileage);
+            sqlCommand.Parameters.AddWithValue("CarCase", car.Gearbox.CarGearboxType.ToString());
+            sqlCommand.Parameters.AddWithValue("Engine", $"{car.Engine.LitrAtKm} / {car.Engine.Power} / {car.Engine.Type.ToString()}");
+            sqlCommand.Parameters.AddWithValue("Equipment", car.Equipment.CarIEquipmentType.ToString());
+            sqlCommand.Parameters.AddWithValue("Tax", car.Tax);
+            sqlCommand.Parameters.AddWithValue("Gearbox", car.Gearbox.CarGearboxType.ToString());
             sqlCommand.Parameters.AddWithValue("MoreInfo", car.MoreInfo);
-            sqlCommand.Parameters.AddWithValue("Cost", car.GetCost());
+            sqlCommand.Parameters.AddWithValue("Cost", car.Cost);
             sqlCommand.Parameters.AddWithValue("YearOfConstruction", car.YearOfConstruction);
             sqlCommand.ExecuteNonQuery();
 
+
+           
             sqlCommand.CommandText =
-                @"Insert INTO [Cars] (AdvertiserId,VinCode,Numberplate) Values (@AdvertiserId,@VinCode,@Numberplate);";
-            sqlCommand.Parameters.AddWithValue("VinCode", car.VinCode);
+                @"Insert INTO [Cars] (AdvertiserId,VinCode,Numberplate) Values (@AdvertiserId,@VinCode1,@Numberplate);";
+            sqlCommand.Parameters.AddWithValue("VinCode1", car.VinCode);
             sqlCommand.Parameters.AddWithValue("AdvertiserId", advertiser.Id);
             sqlCommand.Parameters.AddWithValue("Numberplate", car.NumberPlate);
             sqlCommand.ExecuteNonQuery();
 
+            //sqlCommand.Connection.Close();
+
             sqlCommand.CommandText =
-                @"Insert INTO [Advertisers] (Id, Name,Surname,Lastname,Phone_number) Values (@Id, @Name,@Surname,@Lastname,@Phone_number');";
+                @"Insert INTO [Advertisers] (Id, Name,Surname,Lastname,Phone_number) Values (@Id, @Name,@Surname,@Lastname,@Phone_number);";
             sqlCommand.Parameters.AddWithValue("Id", advertiser.Id);
             sqlCommand.Parameters.AddWithValue("Name", advertiser.Name);
             sqlCommand.Parameters.AddWithValue("Surname", advertiser.Surname);
             sqlCommand.Parameters.AddWithValue("Lastname", advertiser.Lastname);
             sqlCommand.Parameters.AddWithValue("Phone_number", advertiser.Phone_number);
             sqlCommand.ExecuteNonQuery();
+
+            sqlCommand.Connection.Close();
         }
 
         public void DelAdvertisment(string VinCode)
@@ -139,7 +147,7 @@ namespace BlazorTest.Data.Repository
 
         public IEnumerable<Advertisement> GetAdvertisements()
         {
-            
+            advertisements.Clear();
             int index = 0;
             foreach (var link in linking_information)
             {

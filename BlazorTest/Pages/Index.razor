@@ -8,6 +8,10 @@
 <button class="button" @onclick ="GetList">
     Get 
 </button>
+
+<button class="button" @onclick="Insert">
+    Insert
+</button>
 @code {
 
     private IEnumerable<Advertisement> advertisements = new List<Advertisement>();
@@ -15,6 +19,15 @@
     private void GetList()
     {
         advertisements = repository.GetAdvertisements();
+    }
+
+    private void Insert()
+    {
+        Car car = new Car(
+            "Lada", "Gray", "2012", 12, new CarCase(CarCaseModels.Cabriolet), new CarEngine(21.3, 12, CarEngineTypes.Hybrids),
+            new CarEquipment(CarEquipmentTypes.Base), 12, new Gearbox(CarGearboxTypes.Automate), "blabla", "222", "666", 1234);
+        Advertiser advertiser = new Advertiser(2, "Islam", "Ilyasov", "Top", "403");
+        repository.AddAdvertisment(car,advertiser, @"C:\Users\acer\Pictures\Man.jpg");
     }
 }
         

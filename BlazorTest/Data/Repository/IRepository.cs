@@ -8,5 +8,6 @@ namespace BlazorTest.Data.Repository
         IEnumerable<Advertisement> GetAdvertisements();
         void AddAdvertisment(Car carstring,Advertiser advertiser, string pathToImage);
         void DelAdvertisment(string VinCode);
+
     }
 }
