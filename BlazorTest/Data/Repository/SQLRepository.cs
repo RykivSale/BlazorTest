@@ -25,6 +25,7 @@ namespace BlazorTest.Data.Repository
             _context = context;
             using (var conn = new SqlConnection(_context.Database.GetConnectionString()))
             {
+                
                 conn.Open();
                 var sqlCommand = new SqlCommand();
                 sqlCommand.Connection = conn;
@@ -107,7 +108,7 @@ namespace BlazorTest.Data.Repository
             sqlCommand.Parameters.AddWithValue("Model", car.ModelName);
             sqlCommand.Parameters.AddWithValue("Color", car.Color);
             sqlCommand.Parameters.AddWithValue("Mileage", car.Mileage);
-            sqlCommand.Parameters.AddWithValue("CarCase", car.Gearbox.CarGearboxType.ToString());
+            sqlCommand.Parameters.AddWithValue("CarCase", car.CarCase.Name.ToString());
             sqlCommand.Parameters.AddWithValue("Engine", $"{car.Engine.LitrAtKm} / {car.Engine.Power} / {car.Engine.Type.ToString()}");
             sqlCommand.Parameters.AddWithValue("Equipment", car.Equipment.CarIEquipmentType.ToString());
             sqlCommand.Parameters.AddWithValue("Tax", car.Tax);
@@ -142,7 +143,32 @@ namespace BlazorTest.Data.Repository
 
         public void DelAdvertisment(string VinCode)
         {
-            throw new NotImplementedException();
+            //var tmpNode = advertisements.Where(x => x.VinCode != VinCode).ToList()[0];
+            advertisements.RemoveAll(x => x.VinCode == VinCode);
+            cars = cars.Where(x => x.VinCode != VinCode).ToList();
+            var tmp = linking_information.Where(y => y.Value == VinCode).ToList()[0];
+            linking_information.Remove(tmp);
+            advertisers.RemoveAll(x => x.Id == tmp.Key);
+
+            var conn = new SqlConnection(_context.Database.GetConnectionString());
+            conn.Open();
+            SqlCommand sqlCommand = new SqlCommand(
+                "Delete From Advertisers Where Advertisers.Id = (Select Cars.AdvertiserId From Cars Where Cars.VinCode = @vincode);",
+                conn);
+            sqlCommand.Parameters.AddWithValue("vincode", VinCode);
+            sqlCommand.ExecuteNonQuery();
+
+            sqlCommand.CommandText =
+                "Delete From Cars Where Cars.VinCode=@vincode";
+            sqlCommand.ExecuteNonQuery();
+
+            sqlCommand.CommandText =
+                "Delete From CarStat Where CarStat.VinCode=@vincode";
+            sqlCommand.ExecuteNonQuery();
+
+            sqlCommand.Connection.Close();
+            //            Delete From Advertisers
+            //Where Advertisers.Id = (Select Cars.AdvertiserId From Cars Where Cars.VinCode = '222')
         }
 
         public IEnumerable<Advertisement> GetAdvertisements()
@@ -163,6 +189,28 @@ namespace BlazorTest.Data.Repository
                 ++index;
             }
             return advertisements;
+        }
+
+        public IEnumerable<Advertiser> GetAdvertiser()
+        {
+            return advertisers;
+        }
+
+        public IEnumerable<Car> GetCars()
+        {
+            return cars;
+
+        }
+
+        public IEnumerable<CarInfoPage> GetAllNodes()
+        {
+            return advertisements;
+
+        }
+
+        public DB GetDB()
+        {
+            return _context;
         }
     }
 }

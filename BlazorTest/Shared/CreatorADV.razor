@@ -1,0 +1,185 @@
+﻿@inherits CreatorADVModel
+@inject BlazorTest.Data.Repository.IRepository repository;
+@using Microsoft.Data.SqlClient;
+@using BlazorTest.Data;
+@using Microsoft.EntityFrameworkCore;
+
+<div class="form-group">
+    <label class="control-label">Ваше Имя</label>
+    <input type="text" name="username" autocomplete="username" @bind="@Name" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Фамилия</label>
+    <input type="text" name="username" autocomplete="username" @bind="@Surname" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Отчество</label>
+    <input type="text" name="username" autocomplete="username" @bind="@Lastname" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Номер телефона</label>
+    <input type="text" name="username" autocomplete="username" @bind="@Phone_number" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Название модели</label>
+    <input type="text" name="username" autocomplete="username" @bind="ModelName" id="rtcl-user-login" class="form-control" required="">
+</div><div class="form-group">
+    <label class="control-label">Год выпуска</label>
+    <input type="text" name="username" autocomplete="username" @bind="YearOfConstruction" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Цвет</label>
+    <input type="text" name="username" autocomplete="username" @bind="Color" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Пробег(км)</label>
+    <input type="text" name="username" autocomplete="username" @bind="Mileage" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Налог</label>
+    <input type="text" name="username" autocomplete="username" @bind="Tax" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label mr-2">Тип кузова</label>
+    <select class="form-control" @onchange="SetCarCase">
+        @foreach (var item in Enum.GetValues(typeof(CarCaseModels)))
+        {
+            <option value="@item">@item</option>
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label for="basic-url">Двигатель</label>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="basic-url" @bind="lik" aria-describedby="basic-addon3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon3">л/км</span>
+        </div>
+        <input type="text" class="form-control ml-3" id="basic-url" @bind="power" aria-describedby="basic-addon3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon3">л.c.</span>
+        </div>
+        <label class="control-label font-weight-bold ml-3 mr-2 mb-0 p-1">Тип двигателя:</label>
+        <select class="EngineTextbox" @onchange="SetEngine">
+            @foreach (var item in Enum.GetValues(typeof(CarEngineTypes)))
+            {
+                <option value="@item">@item</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="control-label mr-2">Коробка передач</label>
+    <select class="form-control" @onchange="SetGearbox">
+        @foreach (var item in Enum.GetValues(typeof(CarGearboxTypes)))
+        {
+            <option value="@item">@item</option>
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label class="control-label mr-2">Комплектация</label>
+    <select class="form-control" @onchange="SetEquipment">
+        @foreach (var item in Enum.GetValues(typeof(CarEquipmentTypes)))
+        {
+            <option value="@item">@item</option>
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label class="control-label">Цена(руб)</label>
+    <input type="text" name="username" autocomplete="username" @bind="Cost" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Номер машины</label>
+    <input type="text" name="username" autocomplete="username" @bind="NumberPlate" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">VinCode</label>
+    <input type="text" name="username" autocomplete="username" @bind="VinCode" id="rtcl-user-login" class="form-control" required="">
+</div>
+<div class="form-group">
+    <label class="control-label">Комментарий продавца</label> <p></p>
+    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" @bind="MoreInfo"></textarea>
+</div>
+<div class="form-group d-flex align-items-center">
+    <button type="submit" name="rtcl-login" class="btn btn-primary" value="login" @onclick="AddAdv">
+        Отправить объявление
+    </button><div class="form-check">
+    </div>
+</div>
+@code {
+
+    private void SetEngine(ChangeEventArgs arg)
+    {
+        try
+        {
+            var value = arg.Value?.ToString();
+            CarEngineTypes carEngine = (CarEngineTypes)Enum.Parse<CarEngineTypes>(value?? "Petrol");
+            Engine = new CarEngine(lik, power, carEngine);
+        }
+        catch (Exception)
+        {
+
+        }
+
+    }
+    private void SetCarCase(ChangeEventArgs arg)
+    {
+        try
+        {
+            var value = arg.Value?.ToString();
+            CarCase = new CarCase((CarCaseModels)Enum.Parse<CarCaseModels>(value?? "Sedan"));
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    private void SetGearbox(ChangeEventArgs arg)
+    {
+        try
+        {
+            var value = arg.Value?.ToString();
+            Gearbox = new Gearbox((CarGearboxTypes)Enum.Parse<CarGearboxTypes>(value?? "Mechanic"));
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    private void SetEquipment(ChangeEventArgs arg)
+    {
+        try
+        {
+            var value = arg.Value?.ToString();
+            Equipment = new CarEquipment((CarEquipmentTypes)Enum.Parse<CarEquipmentTypes>(value??"Base"));
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    private int GetIndex()
+    {
+        DB _context = repository.GetDB();
+        var conn = new SqlConnection(_context.Database.GetConnectionString());
+        conn.Open();
+        SqlCommand sqlCommand = new SqlCommand(
+            "Select MAX(Advertisers.Id) as 'id' From Advertisers",
+            conn);
+        SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+        sqlDataReader.Read();
+        return Convert.ToInt32(sqlDataReader["id"].ToString()) + 1;
+    }
+
+    private void AddAdv()
+    {
+        Car car = new Car(Name, Color, YearOfConstruction, Mileage, CarCase??new CarCase(CarCaseModels.Sedan),
+            Engine??new CarEngine(lik,power,CarEngineTypes.Petrol), Equipment??new CarEquipment(CarEquipmentTypes.Base), Tax,
+            Gearbox?? new Gearbox(CarGearboxTypes.Mechanic), MoreInfo, VinCode, NumberPlate, Cost);
+
+        Advertiser advertiser = new Advertiser(GetIndex(), Name, Surname, Lastname, Phone_number);
+        repository.AddAdvertisment(car, advertiser, @"C:\Users\acer\Pictures\Man.jpg");
+    }
+}
