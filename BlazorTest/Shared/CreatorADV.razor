@@ -1,5 +1,7 @@
 ﻿@inherits CreatorADVModel
-@inject BlazorTest.Data.Repository.IRepository repository;
+@inject NavigationManager NavigationManager
+@inject BlazorTest.Data.Repository.IRepository repository
+@inject IFileUpload fileUpload
 @using Microsoft.Data.SqlClient;
 @using BlazorTest.Data;
 @using Microsoft.EntityFrameworkCore;
@@ -102,6 +104,16 @@
     <label class="control-label">Комментарий продавца</label> <p></p>
     <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" @bind="MoreInfo"></textarea>
 </div>
+<div class="form-group">
+    <InputFile OnChange="ImageUpload"></InputFile>
+    <strong>Добавлены картинки: </strong>
+
+    @if (uploadedFIles != "")
+    {
+        @uploadedFIles
+   }
+</div>
+
 <div class="form-group d-flex align-items-center">
     <button type="submit" name="rtcl-login" class="btn btn-primary" value="login" @onclick="AddAdv">
         Отправить объявление
@@ -110,12 +122,14 @@
 </div>
 @code {
 
+
+
     private void SetEngine(ChangeEventArgs arg)
     {
         try
         {
             var value = arg.Value?.ToString();
-            CarEngineTypes carEngine = (CarEngineTypes)Enum.Parse<CarEngineTypes>(value?? "Petrol");
+            CarEngineTypes carEngine = (CarEngineTypes)Enum.Parse<CarEngineTypes>(value ?? "Petrol");
             Engine = new CarEngine(lik, power, carEngine);
         }
         catch (Exception)
@@ -129,7 +143,7 @@
         try
         {
             var value = arg.Value?.ToString();
-            CarCase = new CarCase((CarCaseModels)Enum.Parse<CarCaseModels>(value?? "Sedan"));
+            CarCase = new CarCase((CarCaseModels)Enum.Parse<CarCaseModels>(value ?? "Sedan"));
         }
         catch (Exception)
         {
@@ -141,7 +155,7 @@
         try
         {
             var value = arg.Value?.ToString();
-            Gearbox = new Gearbox((CarGearboxTypes)Enum.Parse<CarGearboxTypes>(value?? "Mechanic"));
+            Gearbox = new Gearbox((CarGearboxTypes)Enum.Parse<CarGearboxTypes>(value ?? "Mechanic"));
         }
         catch (Exception)
         {
@@ -153,7 +167,7 @@
         try
         {
             var value = arg.Value?.ToString();
-            Equipment = new CarEquipment((CarEquipmentTypes)Enum.Parse<CarEquipmentTypes>(value??"Base"));
+            Equipment = new CarEquipment((CarEquipmentTypes)Enum.Parse<CarEquipmentTypes>(value ?? "Base"));
         }
         catch (Exception)
         {
@@ -175,11 +189,27 @@
 
     private void AddAdv()
     {
-        Car car = new Car(Name, Color, YearOfConstruction, Mileage, CarCase??new CarCase(CarCaseModels.Sedan),
-            Engine??new CarEngine(lik,power,CarEngineTypes.Petrol), Equipment??new CarEquipment(CarEquipmentTypes.Base), Tax,
-            Gearbox?? new Gearbox(CarGearboxTypes.Mechanic), MoreInfo, VinCode, NumberPlate, Cost);
+        Car car = new Car(ModelName, Color, YearOfConstruction, Mileage, CarCase ?? new CarCase(CarCaseModels.Sedan),
+            Engine ?? new CarEngine(lik, power, CarEngineTypes.Petrol), Equipment ?? new CarEquipment(CarEquipmentTypes.Base), Tax,
+            Gearbox ?? new Gearbox(CarGearboxTypes.Mechanic), MoreInfo, VinCode, NumberPlate, Cost);
 
         Advertiser advertiser = new Advertiser(GetIndex(), Name, Surname, Lastname, Phone_number);
-        repository.AddAdvertisment(car, advertiser, @"C:\Users\acer\Pictures\Man.jpg");
+        List<byte[]> _images = fileUpload.GetImages();
+        repository.AddAdvertisment(car, advertiser, _images);
+        NavigationManager.NavigateTo("/");
+    }
+
+    string uploadedFIles = "";
+    async Task ImageUpload(IFileListEntry[] fileLists)
+    {
+        if (fileLists.FirstOrDefault() != null)
+        {
+            foreach (var item in fileLists)
+            {
+                await fileUpload.UploadAsync(item);
+                uploadedFIles += item.Name+", ";
+            }
+
+        }
     }
 }

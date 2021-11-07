@@ -7,7 +7,7 @@ namespace BlazorTest.Models
 {
     public class CarInfoPage : Advertisement
     {
-        public List<byte[]> Images;
+        public List<byte[]> Images = new List<byte[]>();
         public string Color { get; set; }
         public string YearOfConstruction { get; set; }
         public string CarCase { get; set; }
@@ -15,7 +15,6 @@ namespace BlazorTest.Models
         public string Tax { get; set; }
         public string Gearbox { get; set; }
         public string MoreInfo { get; set; }
-        public string VinCode { get; set; }
         public string NumberPlate { get; set; }
         public string AdvertName { get; set; }
         public string AdvertSurname { get; set; }
@@ -36,6 +35,11 @@ namespace BlazorTest.Models
             AdvertSurname = advertiser.Surname;
             AdvertLastname = advertiser.Lastname;
             AdvertPhone = advertiser.Phone_number;
+        }
+        public void UploadImages(List<byte[]> images)
+        {
+            Image = images[0];
+            Images.AddRange(images);
         }
     }
 }

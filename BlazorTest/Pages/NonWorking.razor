@@ -1,0 +1,63 @@
+﻿@inject BlazorTest.Data.Repository.IRepository repository;
+
+@page  "/Advert/0"
+
+
+<div class="container">
+    <div class="form-group">
+        <h3>@carInfo.ModelName</h3>
+    </div>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            .
+            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+            @for (int i = 1; i < carInfo.Images.Count; i++)
+            {
+                <li data-target="#carouselExampleIndicators" data-slide-to=@i></li>
+            }
+        </ol>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img class="d-block" width="320" height="240" src="@ImageRender(carInfo.Images[0])" alt="ImageError">
+            </div>
+            @for (int i = 1; i < carInfo.Images.Count; i++)
+            {
+                <div class="carousel-item">
+                    <img class="d-block" width="320" height="240"  src="@ImageRender(carInfo.Images[i])" alt="ImageError">
+                </div>
+            }
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+@functions {
+    [Parameter] public string Index { get; set; }
+}
+@code {
+
+
+    public CarInfoPage carInfo { get; set; }
+
+    private void GenerateCarInfo()
+    {
+        carInfo = repository.GetAllNodes().ToList()[Convert.ToInt32(Index)];
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        repository.GetAdvertisements();
+        GenerateCarInfo();
+    }
+    private string ImageRender(byte[] byteImage)
+    {
+        var base64 = Convert.ToBase64String(byteImage);
+        var imgSrc = String.Format("data:image;base64,{0}", base64);
+        return imgSrc;
+    }
+}

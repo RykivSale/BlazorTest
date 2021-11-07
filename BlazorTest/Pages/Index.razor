@@ -5,36 +5,65 @@
 
 
 <h1>это body</h1>
-<button class="button" @onclick ="GetList">
-    Get 
+<button class="button" @onclick="GetList">
+    Get
 </button>
 
 <button class="button" @onclick="Insert">
     Insert
 </button>
-<button class="button" @onclick="Delete">
+<button class="button" @onclick="DeleteButtomsShow">
     Delete
 </button>
-@code {
 
-    private IEnumerable<Advertisement> advertisements = new List<Advertisement>();
+<div class="container">
+    @foreach (var item in advertisements)
+    {
+    <div class="post-preview">
+        <AdvertMainSmallNode carInfo="item" rref_value="@RrefToAdvNode(advertisements.ToList().IndexOf(item))"/>
+        @if (deleteButtonsShow)
+        {
+            <button type="button" class="btn btn-outline-danger" @onclick="@(() =>Delete(item.VinCode))">Убрать с продажи</button>
+        }
+    </div>
+        <hr>
+    }
+</div>
+    @code {
 
-    private void GetList()
-    {
-        repository.GetAdvertisements();
-    }
+        private string RrefToAdvNode(int index)
+        {
+            return "/Advert" + "/" + index.ToString();
+        }
+        bool deleteButtonsShow = false;
 
-    private void Delete()
-    {
-        repository.DelAdvertisment("222");
-    }
-    private void Insert()
-    {
-        Car car = new Car(
-            "Lada", "Gray", "2012", 12, new CarCase(CarCaseModels.Cabriolet), new CarEngine(21.3, 12, CarEngineTypes.Hybrids),
-            new CarEquipment(CarEquipmentTypes.Base), 12, new Gearbox(CarGearboxTypes.Automate), "blabla", "222", "666", 1234);
-        Advertiser advertiser = new Advertiser(2, "Ислам", "Ilyasov", "Top", "403");
-        repository.AddAdvertisment(car,advertiser, @"C:\Users\acer\Pictures\Man.jpg");
-    }
-}
         
+        private IEnumerable<Advertisement> advertisements = new List<Advertisement>();
+
+        protected async override Task OnInitializedAsync()
+        {
+            GetList();
+            advertisements = repository.GetAdvertisements();
+        }
+        private void GetList()
+        {
+            repository.GetAdvertisements();
+        }
+        private void DeleteButtomsShow()
+        {
+            deleteButtonsShow = !deleteButtonsShow;
+        }
+        private void Delete(string vincode)
+        {
+            repository.DelAdvertisment(vincode);
+        }
+        private void Insert()
+        {
+            Car car = new Car(
+                "Lada", "Gray", "2012", 12, new CarCase(CarCaseModels.Cabriolet), new CarEngine(21.3, 12, CarEngineTypes.Hybrids),
+                new CarEquipment(CarEquipmentTypes.Base), 12, new Gearbox(CarGearboxTypes.Automate), "blabla", "111", "666", 1234);
+            Advertiser advertiser = new Advertiser(2, "Ислам ", "Ilyasov", "Top", "403");
+            byte[] arr = File.ReadAllBytes(@"C:\Users\acer\Pictures\Man.jpg");
+            repository.AddAdvertisment(car, advertiser, new List<byte[]>() { arr});
+        }
+    }

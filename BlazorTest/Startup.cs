@@ -1,5 +1,6 @@
 using BlazorTest.Data;
 using BlazorTest.Data.Repository;
+using BlazorTest.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,9 @@ namespace BlazorTest
             services.AddServerSideBlazor();
 
             services.AddScoped<IRepository, SQLRepository>();
+            services.AddScoped<IFileUpload, FileUpload>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

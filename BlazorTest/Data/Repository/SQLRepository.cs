@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using BlazorTest.Models;
@@ -87,7 +88,7 @@ namespace BlazorTest.Data.Repository
                 }
             }
         }
-        public void AddAdvertisment(Car car,Advertiser advertiser, string pathToImage)    
+        public void AddAdvertisment(Car car,Advertiser advertiser, List<byte[]>imageByteForm)    
         {
 
             advertisers.Add(advertiser);
@@ -95,8 +96,10 @@ namespace BlazorTest.Data.Repository
             linking_information.Add(new KeyValuePair<int, string>(advertiser.Id, car.VinCode));
 
             advertisements.Add(new CarInfoPage(car, advertiser));
-            advertisements[advertisements.Count - 1].Image = File.ReadAllBytes(pathToImage);
-            /*advertisements[advertisements.Count - 1].Images.Add(File.ReadAllBytes(pathToImage))*/;
+            int indexnAdv = advertisements.Count - 1;
+            advertisements[indexnAdv].UploadImages(imageByteForm);
+
+            
             var conn = new SqlConnection(_context.Database.GetConnectionString());
             conn.Open();
             SqlCommand sqlCommand = new SqlCommand(
@@ -138,6 +141,16 @@ namespace BlazorTest.Data.Repository
             sqlCommand.Parameters.AddWithValue("Phone_number", advertiser.Phone_number);
             sqlCommand.ExecuteNonQuery();
 
+            int count = 0;
+            foreach (var image in advertisements[indexnAdv].Images)
+            {
+
+                sqlCommand.CommandText =
+               @"Insert INTO [ImagesOfCars] (VinCode,image) Values (@VinCode,@"+$"image{count})";
+                sqlCommand.Parameters.AddWithValue($"image{count}", SqlDbType.VarBinary).Value=image;
+                ++count;
+                sqlCommand.ExecuteNonQuery();
+            }
             sqlCommand.Connection.Close();
         }
 
@@ -166,6 +179,9 @@ namespace BlazorTest.Data.Repository
                 "Delete From CarStat Where CarStat.VinCode=@vincode";
             sqlCommand.ExecuteNonQuery();
 
+            sqlCommand.CommandText =
+                "Delete From ImagesOfCars Where ImagesOfCars.VinCode=@vincode";
+            sqlCommand.ExecuteNonQuery();
             sqlCommand.Connection.Close();
             //            Delete From Advertisers
             //Where Advertisers.Id = (Select Cars.AdvertiserId From Cars Where Cars.VinCode = '222')
@@ -185,12 +201,41 @@ namespace BlazorTest.Data.Repository
 
 
                 advertisements.AddRange(carInfo);
-                advertisements[index].Image = Advertisement.UploadImage(_context.Database.GetConnectionString(), link.Value);
+                string vincode = advertisements[index].VinCode;
+                advertisements[index].UploadImages(GetImagesFromDB(vincode));
                 ++index;
             }
             return advertisements;
         }
+        private List<byte[]> GetImagesFromDB(string vincode)
+        {
+            List<byte[]> _images = new List<byte[]>();
+            using (var conn = new SqlConnection(_context.Database.GetConnectionString()))
+            {
 
+                conn.Open();
+                var sqlCommand = new SqlCommand();
+                sqlCommand.Connection = conn;
+                sqlCommand.CommandText =
+                    @"Select ImagesOfCars.image From ImagesOfCars Where ImagesOfCars.VinCode=@vincode";
+                sqlCommand.Parameters.AddWithValue("vincode", vincode);
+                SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                while (sqlDataReader.Read())
+                {
+                    var hex = (byte[])sqlDataReader["image"];
+                    //byte[] tmp = StringToByteArray(hex);
+                    _images.Add(hex);
+                }
+            }
+            return _images;
+        }
+        public static byte[] StringToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
+        }
         public IEnumerable<Advertiser> GetAdvertiser()
         {
             return advertisers;

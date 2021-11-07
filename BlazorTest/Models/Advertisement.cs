@@ -4,6 +4,7 @@ namespace BlazorTest.Models
 {
     public class Advertisement
     {
+        public string VinCode { get; set; }
         public string ModelName { get; set; }
         public byte[] Image { get; set; }
         public string Engine { get; set; }

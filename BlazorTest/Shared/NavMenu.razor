@@ -1,4 +1,5 @@
-﻿
+﻿@inject BlazorTest.Data.Repository.IRepository repository;
+
 <nav class="navbar navbar-icon-top navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">Авторынок</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
@@ -8,24 +9,24 @@
     <div class="@NavMenuCssClass">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="#">                   
+                <a class="nav-link" href="#">
                     Главная
                 </a>
             </li>
             <li class="nav-item active ">
                 <a class="nav-link" href="#">
                     Объявления
-                    <span class="badge badge-info">5</span>
+                    <span class="badge badge-info">@countOfAdv</span>
                 </a>
             </li>
-            
+
         </ul>
         <ul class="navbar-nav mr-sm-2">
             <li class="nav-item">
                 <a href="AdvCreate" target="_blank">
                     <span class='btn btn-primary'>Подать объявление</span>
                 </a>
-            </li>            
+            </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="text" placeholder="Поиск по объявлениям" aria-label="Search">
@@ -35,13 +36,23 @@
 </nav>
 
 @code {
-        
-        private bool collapseNavMenu = true;
 
-        private string NavMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : null;
-
-        private void ToggleNavMenu()
-        {
-            collapseNavMenu = !collapseNavMenu;
-        }
+    protected async override Task OnInitializedAsync()
+    {
+        countOfAdv = GetCountOfAdv();
     }
+    int countOfAdv;
+    private int GetCountOfAdv()
+    {
+        repository.GetAdvertisements();
+        return repository.GetAllNodes().Count();
+    }
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse navbar-collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,40 @@
+﻿
+<a href="@rref_value">
+    <h2 class="post-title">
+        @carInfo.ModelName
+    </h2>
+    <div class="row">
+        <p class="post-meta">
+            <img src="@ImageRender(carInfo.Image)" width="240" height="240" />
+        </p>
+        <div class="col-sm">
+            <h4 class="post-subtitle">
+                Пробег: @carInfo.Mileage км
+            </h4>
+        </div>
+        <div class="col-sm">
+            <h4 class="post-subtitle">
+                Двигатель: @carInfo.Engine
+            </h4>
+        </div>
+        <div class="col-sm">
+            <h4 class="post-subtitle">
+                Цена: @carInfo.Cost руб
+            </h4>
+        </div>
+        
+    </div>
+</a>
+@code {
+    [Parameter]
+    public Advertisement carInfo { get; set; }
+    [Parameter]
+    public string rref_value { get; set; }
+    private string ImageRender(byte[] byteImage)
+    {
+        var base64 = Convert.ToBase64String(byteImage);
+        var imgSrc = String.Format("data:image;base64,{0}", base64);
+        return imgSrc;
+    }
+
+}

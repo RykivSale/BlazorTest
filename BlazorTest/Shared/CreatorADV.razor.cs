@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorInputFile;
 using BlazorTest.Models.CarModules;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BlazorTest.Shared
 {
-    public class CreatorADVModel:ComponentBase 
+    public class CreatorADVModel : ComponentBase
     {
         [Parameter]
         public string Name { get; set; }
@@ -31,5 +34,36 @@ namespace BlazorTest.Shared
         [Parameter] public string VinCode { get; set; }
         [Parameter] public string NumberPlate { get; set; }
         [Parameter] public int Cost { get; set; }
+
+        
+    }
+
+
+    interface IFileUpload
+    {
+        Task UploadAsync(IFileListEntry file);
+        public List<byte[]> GetImages();
+    }
+    class FileUpload:IFileUpload
+    {
+        private readonly IWebHostEnvironment _environment;
+        public FileUpload(IWebHostEnvironment environment)
+        {
+            _environment = environment;
+        }
+        public List<byte[]> images { get; set; } = new List<byte[]>();
+
+        public List<byte[]> GetImages()
+        {
+            return images;
+        }
+
+        public async Task UploadAsync(IFileListEntry file)
+        {
+            var path = file.RelativePath;
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            images.Add(ms.ToArray());
+        }
     }
 }
